@@ -54,30 +54,33 @@ jobs:
           rsync -av --include='*/' --include="*.smx" --exclude="*" --prune-empty-dirs --remove-source-files $SCRIPTS_PATH/ $PLUGINS_PATH/
 
       - name: Move folders to build
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir build
           mv ./addons build/
 
       - name: Copy configs to build
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           mkdir -p build/addons/sourcemod/configs
           cp configs/jumphelper_defaults.cfg build/addons/sourcemod/configs/
 
       - name: Remove unnecessary files and folders from build
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           rm -rf addons/sourcemod/scripting
         working-directory: ./build
 
       - name: Compress package
-        if: startsWith(github.ref, 'refs/tags/')
         run: zip -9rq ../gokz-missedby.zip *
         working-directory: ./build
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: gokz-missedby
+          path: gokz-missedby.zip
+
       - name: Get the version
         id: get_version
+        if: startsWith(github.ref, 'refs/tags/')
         run: echo "VERSION=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
 
       - name: Release
