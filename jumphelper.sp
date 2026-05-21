@@ -17,7 +17,7 @@ public Plugin myinfo =
 	author      = "jvnipers",
 	description = "Create and manage jump zones that display how much you missed a jump by.",
 	version     = "1.0",
-	url         = ""
+	url         = "https://github.com/FemboyKZ/gokz-missedby"
 };
 
 #define MAX_ZONES           512
