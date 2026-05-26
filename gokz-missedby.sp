@@ -16,7 +16,7 @@ public Plugin myinfo =
     name        = "GOKZ Jump Miss Helper",
     author      = "jvnipers",
     description = "Create and manage jump zones that display how much you missed a jump by.",
-    version     = "1.0",
+    version     = "1.0.0",
     url         = "https://github.com/FemboyKZ/gokz-missedby"
 };
 
