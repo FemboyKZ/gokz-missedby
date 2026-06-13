@@ -23,7 +23,7 @@ public Plugin myinfo =
 #define MAX_ZONES          512
 #define STEAMID_LEN        32
 #define MAX_NAME_LEN       64
-#define DEFAULTS_PATH      "configs/jumphelper_defaults.cfg"
+#define DEFAULTS_PATH      "configs/missedby.cfg"
 
 // Source engine ground epsilon: player origin sits exactly this far above the surface.
 // threshold_z = surface_hit_z (or abs_origin_z) - GROUND_EPSILON = actual floor level.
