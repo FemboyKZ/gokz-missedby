@@ -550,7 +550,7 @@ public void DB_OnSaveZone(Database db, DBResultSet rs, const char[] error, any u
 
     if (client != 0)
     {
-        GOKZ_PrintToChat(client, true, "{purple}Zone saved.");
+        GOKZ_PrintToChat(client, true, "{default}Zone saved.");
         delete g_hWsCrossTimer[client];
         for (int i = 0; i < 4; i++)
             g_bWsPosSet[client][i] = false;
@@ -583,7 +583,7 @@ public void DB_OnDeleteZone(Database db, DBResultSet rs, const char[] error, any
 
     if (client != 0)
     {
-        GOKZ_PrintToChat(client, true, "{purple}Zone deleted.");
+        GOKZ_PrintToChat(client, true, "{default}Zone deleted.");
         DB_LoadPlayerZones(client);
     }
 }
@@ -661,7 +661,7 @@ public int MenuHandler_Main(Menu menu, MenuAction action, int client, int param2
             g_bEnable[client] = !g_bEnable[client];
             SetClientCookie(client, g_hCookieEnable, g_bEnable[client] ? "1" : "0");
             GOKZ_PrintToChat(client, true, "{default}Jump Miss Helper: %s",
-                             g_bEnable[client] ? "{purple}ON" : "{grey}OFF");
+                             g_bEnable[client] ? "{green}ON" : "{darkred}OFF");
             OpenMainMenu(client);
         }
         else if (StrEqual(info, "zones"))
@@ -734,8 +734,8 @@ public int MenuHandler_Zones(Menu menu, MenuAction action, int client, int param
                     // Defaults are on for everyone; this toggles the per-player opt-out.
                     bool nowOff = !IsDefaultDisabled(client, idx);
                     SetDefaultDisabled(client, idx, nowOff);
-                    GOKZ_PrintToChat(client, true, "{default}Default zone %s: %s",
-                                     g_sZoneName[idx], nowOff ? "{grey}OFF" : "{purple}ON");
+                    GOKZ_PrintToChat(client, true, "{default}Default zone {purple}%s{default}: %s",
+                                     g_sZoneName[idx], nowOff ? "{darkred}OFF" : "{green}ON");
                     if (!nowOff)
                         FlashZone(client, idx);
                 }
@@ -743,12 +743,12 @@ public int MenuHandler_Zones(Menu menu, MenuAction action, int client, int param
                 {
                     // Toggle the selected custom zone back off.
                     g_iActiveZone[client] = -1;
-                    GOKZ_PrintToChat(client, true, "{grey}Active zone cleared.");
+                    GOKZ_PrintToChat(client, true, "{default}Active zone cleared.");
                 }
                 else
                 {
                     g_iActiveZone[client] = idx;
-                    GOKZ_PrintToChat(client, true, "{purple}Active zone: {default}%s", g_sZoneName[idx]);
+                    GOKZ_PrintToChat(client, true, "{default}Active zone: {purple}%s", g_sZoneName[idx]);
                     FlashZone(client, idx);
                 }
             }
@@ -913,8 +913,8 @@ public int MenuHandler_Setup(Menu menu, MenuAction action, int client, int param
         else if (StrEqual(info, "threshdir"))
         {
             g_bWsThreshDown[client] = !g_bWsThreshDown[client];
-            GOKZ_PrintToChat(client, true, "{default}Threshold direction: %s",
-                             g_bWsThreshDown[client] ? "{purple}Downward" : "{yellow}Upward");
+            GOKZ_PrintToChat(client, true, "{default}Threshold direction: {purple}%s",
+                             g_bWsThreshDown[client] ? "Downward" : "Upward");
             OpenSetupMenu(client);
         }
         else
@@ -1158,7 +1158,7 @@ void PlaceWorkspacePoint(int client, const char[] point)
             else
             {
                 GOKZ_PrintToChat(client, true,
-                                 "{grey}No edge found within search range. Using raw crosshair point.");
+                                 "{darkred}No edge found within search range. Using raw crosshair point.");
             }
             SnapToNearbyWall(placePos);
         }
@@ -1177,7 +1177,7 @@ void PlaceWorkspacePoint(int client, const char[] point)
         g_fWsPos3D[client][0][2] = placePos[2];
         g_bWsPosSet[client][0]   = true;
         g_bWsInProgress[client]  = true;
-        GOKZ_PrintToChat(client, true, "{purple}P0: {default}(%.3f, %.3f)", placePos[0], placePos[1]);
+        GOKZ_PrintToChat(client, true, "{default}P0: [{purple}%.3f, %.3f{default}]", placePos[0], placePos[1]);
         g_fWsThreshZ[client]     = autoThreshZ;
         g_fWsPos3D[client][3][0] = placePos[0];
         g_fWsPos3D[client][3][1] = placePos[1];
@@ -1193,7 +1193,7 @@ void PlaceWorkspacePoint(int client, const char[] point)
         g_fWsPos3D[client][1][2] = placePos[2];
         g_bWsPosSet[client][1]   = true;
         g_bWsInProgress[client]  = true;
-        GOKZ_PrintToChat(client, true, "{purple}P1: {default}(%.3f, %.3f)", placePos[0], placePos[1]);
+        GOKZ_PrintToChat(client, true, "{default}P1: [{purple}%.3f, %.3f{default}]", placePos[0], placePos[1]);
         g_fWsThreshZ[client]     = autoThreshZ;
         g_fWsPos3D[client][3][0] = placePos[0];
         g_fWsPos3D[client][3][1] = placePos[1];
@@ -1209,7 +1209,7 @@ void PlaceWorkspacePoint(int client, const char[] point)
         g_fWsPos3D[client][2][2] = placePos[2];
         g_bWsPosSet[client][2]   = true;
         g_bWsInProgress[client]  = true;
-        GOKZ_PrintToChat(client, true, "{purple}P2: {default}(%.3f, %.3f)", placePos[0], placePos[1]);
+        GOKZ_PrintToChat(client, true, "{default}P2: [{purple}%.3f, %.3f{default}]", placePos[0], placePos[1]);
         g_fWsThreshZ[client]     = autoThreshZ;
         g_fWsPos3D[client][3][0] = placePos[0];
         g_fWsPos3D[client][3][1] = placePos[1];
@@ -1225,7 +1225,7 @@ void PlaceWorkspacePoint(int client, const char[] point)
         g_fWsPos3D[client][3][2] = autoThreshZ;
         g_bWsPosSet[client][3]   = true;
         g_bWsInProgress[client]  = true;
-        GOKZ_PrintToChat(client, true, "{purple}Crossing Z override: {default}%.5f", autoThreshZ);
+        GOKZ_PrintToChat(client, true, "{default}Crossing Z override: {purple}%.5f", autoThreshZ);
     }
     WsCrossStart(client);
     OpenSetupMenu(client);
@@ -1278,12 +1278,12 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
                 continue;
 
             if (viewer == client)
-                GOKZ_PrintToChat(viewer, false,
-                                 "{purple}You{grey} were {darkred}%.2f {grey}away from %s! (%s)",
+                GOKZ_PrintToChat(viewer, true,
+                                 "{purple}You{default} were {darkred}%.2f {default}away from {purple}%s{default}! (%s)",
                                  distance, g_sZoneName[z], duckStr);
             else
-                GOKZ_PrintToChat(viewer, false,
-                                 "{purple}%N{grey} was {darkred}%.2f {grey}away from %s! (%s)",
+                GOKZ_PrintToChat(viewer, true,
+                                 "{purple}%N{default} was {darkred}%.2f {default}away from {purple}%s{default}! (%s)",
                                  client, distance, g_sZoneName[z], duckStr);
             MeasureBeam(viewer, originStart, originEnd, 5.0, 0.2, 200, 200, 200);
         }
@@ -1640,7 +1640,7 @@ public Action CmdExportZone(int client, int args)
         }
         if (zoneIdx < 0)
         {
-            GOKZ_PrintToChat(client, true, "{darkred}Zone \"%s\" not found.", searchName);
+            GOKZ_PrintToChat(client, true, "{darkred}Zone {purple}\"%s\" {darkred}not found.", searchName);
             return Plugin_Handled;
         }
     }
@@ -1683,7 +1683,7 @@ public Action CmdImportZone(int client, int args)
 
     if (args < 1)
     {
-        GOKZ_PrintToChat(client, true, "{darkred}Usage: sm_miss_import <export_string>");
+        GOKZ_PrintToChat(client, true, "{darkred}Usage: {purple}sm_miss_import <export_string>");
         return Plugin_Handled;
     }
 
@@ -1703,7 +1703,7 @@ public Action CmdImportZone(int client, int args)
     GetCurrentMap(mapName, sizeof(mapName));
     if (!StrEqual(parts[2], mapName, false))
     {
-        GOKZ_PrintToChat(client, true, "{darkred}Zone is for map {default}%s{darkred}, not current map.", parts[2]);
+        GOKZ_PrintToChat(client, true, "{darkred}Zone is for map {purple}%s{darkred}, not current map.", parts[2]);
         return Plugin_Handled;
     }
 
@@ -1721,6 +1721,6 @@ public Action CmdImportZone(int client, int args)
     g_bWsThreshDown[client] = StringToInt(parts[12]) != 0;
 
     DB_SaveZone(client, parts[3]);
-    GOKZ_PrintToChat(client, true, "{purple}Importing zone {default}%s{purple}...", parts[3]);
+    GOKZ_PrintToChat(client, true, "{default}Importing zone {purple}%s{default}...", parts[3]);
     return Plugin_Handled;
 }
