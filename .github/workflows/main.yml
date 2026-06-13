@@ -60,7 +60,7 @@ jobs:
       - name: Copy configs to build
         run: |
           mkdir -p build/addons/sourcemod/configs
-          cp configs/jumphelper_defaults.cfg build/addons/sourcemod/configs/
+          cp configs/missedby.cfg build/addons/sourcemod/configs/
 
       - name: Remove unnecessary files and folders from build
         run: |
