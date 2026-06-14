@@ -1312,7 +1312,7 @@ public void OnPlayerRunCmdPost(int client, int buttons, int impulse, const float
                 GOKZ_PrintToChat(viewer, true,
                                  "{purple}%N{default} was {darkred}%.2f {default}away from {purple}%s{default}! (%s)",
                                  client, distance, g_sZoneName[z], duckStr);
-            MeasureBeam(viewer, originStart, originEnd, 5.0, 0.2, 200, 200, 200);
+            DrawMissBeam(viewer, originStart, originEnd, distance);
         }
     }
 }
@@ -1377,40 +1377,68 @@ bool ComputeZoneMiss(int client, int z, float startZ, float endZ,
     else
         t = (startZ - thresh) / (startZ - endZ);
 
-    // Interpolate XY landing position; offset by -16/+16 to check one hull corner.
-    float estOrigin[2];
-    estOrigin[0] = g_fStartOrigin[client][0] + t * (g_fEndOrigin[client][0] - g_fStartOrigin[client][0]) - 16.0;
-    estOrigin[1] = g_fStartOrigin[client][1] + t * (g_fEndOrigin[client][1] - g_fStartOrigin[client][1]) + 16.0;
+    // Two opposite hull corners at the crossing plane. 
+    // For each corner take the nearest point on the zone edge,
+    // the smallest is the miss, and its corner + edge point become the beam endpoints
+    // so the drawn line is the actual miss vector (length = distance, points at the edge).
+    float cornerA[2], cornerB[2];
+    cornerA[0]  = g_fStartOrigin[client][0] + t * (g_fEndOrigin[client][0] - g_fStartOrigin[client][0]) - 16.0;
+    cornerA[1]  = g_fStartOrigin[client][1] + t * (g_fEndOrigin[client][1] - g_fStartOrigin[client][1]) + 16.0;
+    cornerB[0]  = cornerA[0] + 32.0;
+    cornerB[1]  = cornerA[1];
 
-    float d      = GetDistance2D(estOrigin, g_fZoneP0[z], g_fZoneP1[z]);
+    float bestD = 999999.0;
+    float bestCorner[2], bestTarget[2], cp[2];
+
+    float dd = ClosestPointOnSegment2D(cornerA, g_fZoneP0[z], g_fZoneP1[z], cp);
+    if (dd < bestD)
+    {
+        bestD      = dd;
+        bestCorner = cornerA;
+        bestTarget = cp;
+    }
+    dd = ClosestPointOnSegment2D(cornerB, g_fZoneP0[z], g_fZoneP1[z], cp);
+    if (dd < bestD)
+    {
+        bestD      = dd;
+        bestCorner = cornerB;
+        bestTarget = cp;
+    }
     if (g_bZoneHasP2[z])
-        d = FloatMin(d, GetDistance2D(estOrigin, g_fZoneP2[z], g_fZoneP1[z]));
+    {
+        dd = ClosestPointOnSegment2D(cornerA, g_fZoneP2[z], g_fZoneP1[z], cp);
+        if (dd < bestD)
+        {
+            bestD      = dd;
+            bestCorner = cornerA;
+            bestTarget = cp;
+        }
+        dd = ClosestPointOnSegment2D(cornerB, g_fZoneP2[z], g_fZoneP1[z], cp);
+        if (dd < bestD)
+        {
+            bestD      = dd;
+            bestCorner = cornerB;
+            bestTarget = cp;
+        }
+    }
 
-    // Check opposite hull corner (+32 on X from first sample).
-    float estOrigin2[2];
-    estOrigin2[0] = estOrigin[0] + 32.0;
-    estOrigin2[1] = estOrigin[1];
-    d             = FloatMin(d, GetDistance2D(estOrigin2, g_fZoneP0[z], g_fZoneP1[z]));
-    if (g_bZoneHasP2[z])
-        d = FloatMin(d, GetDistance2D(estOrigin2, g_fZoneP2[z], g_fZoneP1[z]));
-
-    if (d > 150.0)
+    if (bestD > 150.0)
         return false;
 
-    distance       = d;
-    originStart[0] = estOrigin[0];
-    originStart[1] = estOrigin[1];
+    distance       = bestD;
+    originStart[0] = bestCorner[0];
+    originStart[1] = bestCorner[1];
     originStart[2] = g_fZoneThreshZ[z];
-    originEnd[0]   = estOrigin[0] - 32.0;
-    originEnd[1]   = estOrigin[1];
+    originEnd[0]   = bestTarget[0];
+    originEnd[1]   = bestTarget[1];
     originEnd[2]   = g_fZoneThreshZ[z];
     return true;
 }
 
 // ===== Helpers =====
 
-// Returns minimum distance from point p to line segment a->b in 2D.
-float GetDistance2D(float p[2], float a[2], float b[2])
+// Closest point on segment a->b to point p (2D). Fills `out`, returns the distance.
+float ClosestPointOnSegment2D(float p[2], float a[2], float b[2], float out[2])
 {
     float dx     = b[0] - a[0];
     float dy     = b[1] - a[1];
@@ -1420,26 +1448,32 @@ float GetDistance2D(float p[2], float a[2], float b[2])
     if (len_sq != 0.0)
         param = ((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / len_sq;
 
-    float xx, yy;
     if (param < 0.0)
     {
-        xx = a[0];
-        yy = a[1];
+        out[0] = a[0];
+        out[1] = a[1];
     }
     else if (param > 1.0)
     {
-        xx = b[0];
-        yy = b[1];
+        out[0] = b[0];
+        out[1] = b[1];
     }
     else
     {
-        xx = a[0] + param * dx;
-        yy = a[1] + param * dy;
+        out[0] = a[0] + param * dx;
+        out[1] = a[1] + param * dy;
     }
 
-    float rx = p[0] - xx;
-    float ry = p[1] - yy;
+    float rx = p[0] - out[0];
+    float ry = p[1] - out[1];
     return SquareRoot(rx * rx + ry * ry);
+}
+
+// Returns minimum distance from point p to line segment a->b in 2D.
+float GetDistance2D(float p[2], float a[2], float b[2])
+{
+    float out[2];
+    return ClosestPointOnSegment2D(p, a, b, out);
 }
 
 void MeasureBeam(int client, float start[3], float end[3], float life, float width,
@@ -1467,6 +1501,34 @@ void MeasureBeam(int client, float start[3], float end[3], float life, float wid
     int clients[1];
     clients[0] = client;
     TE_Send(clients, 1, 0.0);
+}
+
+// A line from where the player crossed the plane to the nearest point on the zone edge they fell short of.
+// Length = miss distance, direction = which way they were off.
+// Colour ramps green (just barely) -> red (far off),
+// and vertical pillars at each end keep it readable from any angle, including top-down.
+void DrawMissBeam(int client, float land[3], float target[3], float distance)
+{
+    float frac = distance / 100.0;
+    if (frac > 1.0)
+        frac = 1.0;
+    int   r    = RoundToNearest(40.0 + 215.0 * frac);
+    int   g    = RoundToNearest(255.0 - 215.0 * frac);
+    int   b    = 40;
+
+    float life = 5.0;
+
+    // Horizontal miss vector along the crossing plane.
+    MeasureBeam(client, land, target, life, 0.45, r, g, b);
+
+    // Pillar at the landing point (miss color) and at the edge you needed (green).
+    float landTop[3], targetTop[3];
+    landTop = land;
+    landTop[2] += 28.0;
+    targetTop = target;
+    targetTop[2] += 28.0;
+    MeasureBeam(client, land, landTop, life, 0.35, r, g, b);
+    MeasureBeam(client, target, targetTop, life, 0.35, 0, 255, 0);
 }
 
 // ===== Zone flash (on selection) =====
